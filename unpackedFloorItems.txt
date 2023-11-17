@@ -1,0 +1,2 @@
+//FloorItemIndex - Item ID -  Amount X Y Z
+1 - 526 - 2 3096 3456 0
