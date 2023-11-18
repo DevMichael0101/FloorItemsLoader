@@ -1,2 +1,3 @@
-//FloorItemIndex - Item ID -  Amount X Y Z
+//FloorItemIndex - Item ID -  Amount X Y Z     If itemId == 0, a random item will be loaded from the array.
 1 - 526 - 2 3096 3456 0
+2 - 0 - 1 3097 3456 0
