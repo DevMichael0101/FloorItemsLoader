@@ -422,7 +422,7 @@ public final class FloorItemsLoader {
 
 
 
-			if( 0 == 0){// Utils.getRandom(500) == 0){ 
+			if( Utils.getRandom(500) == 0 ){ 
 				//create a rare instead
 
 				index = Utils.getRandom(0 + RANDOM_ITEMS_RARES.length - 1);
