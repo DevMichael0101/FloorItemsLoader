@@ -32,8 +32,10 @@ public final class FloorItemsLoader {
 	public static HashMap <Integer, Integer> floorItemsZ; // FloorItemIndex, z 
 	public static HashMap <Integer, FloorItem> floorItemsStored; //These will be stored items that are tested compared to later.
 
-	public static int[] RANDOM_ITEMS = { 995 , 989 }; //Not yet developed.
-	
+	public static int[] RANDOM_ITEMS = { 995 , 989 }; //Id's only, amount are randomized on creation method-->create_RandomItem()
+	public static int[] RANDOM_ITEMS_RARES = { 25065 }; //Id's only, amount are randomized on creation method-->create_RandomItem()
+
+
 
 	public static final void init() {
 
@@ -297,25 +299,174 @@ public final class FloorItemsLoader {
 
 	}
 
-	public static Item create_RandomItem(int[] array){
-			//Developing later
-			Item item = new Item(1,1);
-			int index = 0;
-			int length = (array.length) - 1;
-			index = Utils.getRandom(length); 
-			if(RANDOM_ITEMS[index] == 995){
+
+
+
+	public  static boolean tileDoesContainRandomItem(int key, Region region, WorldTile tile) {
+				//returns true if the passed tile contains an item from the randomitems array
+
+				try{
+
+
+					region.forceGetFloorItems(); //do this to prevent null container error
+					if(region.getFloorItems().size()==0){ //no items were found in the region at all, so return false
+						return false;
+					}else{//some items were found in the regions container
+
+
+						floorItemsStored = new HashMap<Integer, FloorItem >(180);
+						floorItemsStored.clear();//just cause
+
+						for(int index = 0 ; index < region.getFloorItems().size() ;index++){//load all floor items in that region, assign an index to each.
+							//Load a single flooritem that was found in the region. This floor item will contain all of its personal data, like its id, amount, and location.
+							FloorItem floorItem = new FloorItem( region.getFloorItems().get(index),  new WorldTile(region.getFloorItems().get(index).getTile().getX(),region.getFloorItems().get(index).getTile().getY(),region.getFloorItems().get(index).getTile().getPlane()), null, false, false); // load in a floor item of the region with its values
+							if(floorItem!=null){
+								floorItemsStored.put(index, floorItem ); 
+							}
+						}
+
+
+						//now that we have all the items in the region hashed, see if what we want is there, or not,  or count.
+						for(int index = 0 ; index < floorItemsStored.size() ;index++){//load all floor items in that region, assign an index to each.
+								FloorItem hashedFloorItem = get_FloorItem_Stored(index);
+
+
+									//iterate through flooritems
+
+									if( hashedFloorItem.getTile().getX() ==  get_FloorItem_X(key) && hashedFloorItem.getTile().getY() ==  get_FloorItem_Y(key) && hashedFloorItem.getTile().getPlane() ==  get_FloorItem_Z(key) ) {
+										//respawn tile that is equal to the keys
+										
+										//is this item, a random item?
+
+										if( is_randomItem( hashedFloorItem.getId() ) ){
+											return true;
+										}
+
+									}
+
+
+						}
+
+
+					}
+				}catch(Exception e){
+					//System.out.println(e );
+				}
+
+		return false;
+	}
+
+	public  static FloorItem getRandomFlooritemOnTile(int key, Region region, WorldTile tile) {
+				//returns true if the passed tile contains an item from the randomitems array
+
+				try{
+
+
+					region.forceGetFloorItems(); //do this to prevent null container error
+					if(region.getFloorItems().size()==0){ //no items were found in the region at all, so return false
+						return null;
+					}else{//some items were found in the regions container
+
+
+						floorItemsStored = new HashMap<Integer, FloorItem >(180);
+						floorItemsStored.clear();//just cause
+
+						for(int index = 0 ; index < region.getFloorItems().size() ;index++){//load all floor items in that region, assign an index to each.
+							//Load a single flooritem that was found in the region. This floor item will contain all of its personal data, like its id, amount, and location.
+							FloorItem floorItem = new FloorItem( region.getFloorItems().get(index),  new WorldTile(region.getFloorItems().get(index).getTile().getX(),region.getFloorItems().get(index).getTile().getY(),region.getFloorItems().get(index).getTile().getPlane()), null, false, false); // load in a floor item of the region with its values
+							if(floorItem!=null){
+								floorItemsStored.put(index, floorItem ); 
+							}
+						}
+
+
+						//now that we have all the items in the region hashed, see if what we want is there, or not,  or count.
+						for(int index = 0 ; index < floorItemsStored.size() ;index++){//load all floor items in that region, assign an index to each.
+								FloorItem hashedFloorItem = get_FloorItem_Stored(index);
+
+									if( hashedFloorItem.getTile().getX() ==  get_FloorItem_X(key) && hashedFloorItem.getTile().getY() ==  get_FloorItem_Y(key) && hashedFloorItem.getTile().getPlane() ==  get_FloorItem_Z(key) ) {
+										if( is_randomItem(hashedFloorItem.getId()) ){
+											return hashedFloorItem;
+										}
+									}
+						}
+					}
+
+				}catch(Exception e){
+					//System.out.println(e );
+				}
+
+		return null;
+	}
+
+	public static Item create_RandomItem(){
+
+			//Standard random items
+			Item item = new Item(995,1); //temp random item
+			int length = RANDOM_ITEMS.length - 1;
+
+			int index = Utils.getRandom(0 + length); //let's us default to index 0
+
+			if(RANDOM_ITEMS[index] == 995){//if the item is coins
 				item.setId( RANDOM_ITEMS[index] );
 				item.setAmount(   1 +  Utils.getRandom(10000)   );
-			}else{
+			}else{//anything else
 				item.setId(RANDOM_ITEMS[index]);
 				if(   item.getDefinitions().isStackable()   ){
-					item.setAmount(   1 +  Utils.getRandom(3)   );
+					item.setAmount(   1 +  Utils.getRandom(3)   );					//if it's stackable, give them a few.
 				}else{
-					item.setAmount(1);
+					item.setAmount(1);					//other wise just 1
 				}
+
 			}
+
+
+
+			if( 0 == 0){// Utils.getRandom(500) == 0){ 
+				//create a rare instead
+
+				index = Utils.getRandom(0 + RANDOM_ITEMS_RARES.length - 1);
+				item.setId(RANDOM_ITEMS_RARES[index]);
+				item.setAmount(1);
+			
+			
+			}
+
+
+
+
+
+
+
 			return  item;  
  	}
+
+	public static boolean is_randomItem(int itemId){
+			//Returns true if the sent item id is a value that is in the randomitem array
+
+			for(int index = 0; index < (RANDOM_ITEMS.length) ; index++){
+				if(RANDOM_ITEMS[index] == itemId){
+					return true;
+				}
+			}
+
+			for(int index = 0; index < (RANDOM_ITEMS_RARES.length) ; index++){
+				if(RANDOM_ITEMS_RARES[index] == itemId){
+					return true;
+				}
+			}
+
+
+			return  false;  
+ 	}
+
+
+
+
+
+
+
+
 
 }
 
